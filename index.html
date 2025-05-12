@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Lịch Học Chuyên Nghiệp - Có Thể Chỉnh Sửa</title>
+    <title>Lịch Học Chuyên Nghiệp</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -15,34 +15,13 @@
             text-align: center;
             color: #333;
         }
-        .schedule {
+        .schedule, .form-container {
             max-width: 1200px;
             margin: 0 auto;
             background-color: #fff;
             padding: 20px;
             border-radius: 8px;
             box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-        }
-        .form-container {
-            margin-bottom: 20px;
-            display: flex;
-            flex-wrap: wrap;
-            gap: 10px;
-            justify-content: center;
-        }
-        .form-container input, .form-container select, .form-container button {
-            padding: 8px;
-            font-size: 14px;
-            border: 1px solid #ddd;
-            border-radius: 4px;
-        }
-        .form-container button {
-            background-color: #4CAF50;
-            color: white;
-            cursor: pointer;
-        }
-        .form-container button:hover {
-            background-color: #45a049;
         }
         table {
             width: 100%;
@@ -54,7 +33,6 @@
             padding: 10px;
             text-align: center;
             font-size: 14px;
-            cursor: pointer;
         }
         th {
             background-color: #4CAF50;
@@ -62,6 +40,7 @@
         }
         td {
             background-color: #fafafa;
+            cursor: pointer;
         }
         td:empty {
             background-color: #f0f0f0;
@@ -70,38 +49,60 @@
             font-weight: bold;
             color: #2c3e50;
         }
+        .form-container {
+            margin-bottom: 20px;
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+        .form-container select, .form-container input {
+            padding: 8px;
+            font-size: 14px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+        .form-container button {
+            padding: 8px 16px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        .form-container button:hover {
+            background-color: #45a049;
+        }
         @media (max-width: 768px) {
             table, th, td {
                 font-size: 12px;
                 padding: 8px;
             }
-            .form-container input, .form-container select, .form-container button {
-                width: 100%;
-                margin-bottom: 10px;
+            .form-container {
+                flex-direction: column;
             }
         }
     </style>
 </head>
 <body>
     <h1>Lịch Học Chuyên Nghiệp - Tuần 1</h1>
+    <div class="form-container">
+        <select id="timeSlot">
+            <option value="08:30 - 10:00">08:30 - 10:00</option>
+            <option value="10:30 - 12:00">10:30 - 12:00</option>
+            <option value="13:15 - 14:45">13:15 - 14:45</option>
+            <option value="15:15 - 16:00">15:15 - 16:00</option>
+        </select>
+        <select id="day">
+            <option value="Thứ Hai">Thứ Hai</option>
+            <option value="Thứ Ba">Thứ Ba</option>
+            <option value="Thứ Tư">Thứ Tư</option>
+            <option value="Thứ Năm">Thứ Năm</option>
+            <option value="Thứ Sáu">Thứ Sáu</option>
+        </select>
+        <input type="text" id="course" placeholder="Nhập môn học">
+        <button onclick="updateSchedule()">Thêm/Chỉnh sửa</button>
+    </div>
     <div class="schedule">
-        <div class="form-container">
-            <select id="timeSlot">
-                <option value="08:00 - 10:00">08:30 - 10:00</option>
-                <option value="10:15 - 12:15">10:30 - 12:00</option>
-                <option value="13:30 - 15:30">13:15 - 14:45</option>
-                <option value="15:45 - 17:45">15:15 - 16:00</option>
-            </select>
-            <select id="day">
-                <option value="Thứ Hai">Thứ Hai</option>
-                <option value="Thứ Ba">Thứ Ba</option>
-                <option value="Thứ Tư">Thứ Tư</option>
-                <option value="Thứ Năm">Thứ Năm</option>
-                <option value="Thứ Sáu">Thứ Sáu</option>
-            </select>
-            <input type="text" id="course" placeholder="Môn học (VD: Lập trình Python)">
-            <button onclick="addOrUpdateCourse()">Thêm/Chỉnh sửa</button>
-        </div>
         <table id="scheduleTable">
             <tr>
                 <th>Thời gian</th>
@@ -113,89 +114,73 @@
             </tr>
             <tr>
                 <td>08:30 - 10:00</td>
-                <td class="course" onclick="editCell(this)">Lập trình Python</td>
-                <td onclick="editCell(this)"></td>
-                <td class="course" onclick="editCell(this)">Phát triển Web</td>
-                <td class="course" onclick="editCell(this)">Cơ sở dữ liệu</td>
-                <td class="course" onclick="editCell(this)">Kiểm thử phần mềm</td>
+                <td class="course">Lập trình Python</td>
+                <td></td>
+                <td class="course">Phát triển Web</td>
+                <td class="course">Cơ sở dữ liệu</td>
+                <td class="course">Kiểm thử phần mềm</td>
             </tr>
             <tr>
                 <td>10:30 - 12:00</td>
-                <td onclick="editCell(this)"></td>
-                <td class="course" onclick="editCell(this)">Thiết kế UI/UX</td>
-                <td class="course" onclick="editCell(this)">Lập trình JavaScript</td>
-                <td onclick="editCell(this)"></td>
-                <td class="course" onclick="editCell(this)">Quản lý dự án</td>
+                <td></td>
+                <td class="course">Thiết kế UI/UX</td>
+                <td class="course">Lập trình JavaScript</td>
+                <td></td>
+                <td class="course">Quản lý dự án</td>
             </tr>
             <tr>
                 <td>13:15 - 14:45</td>
-                <td class="course" onclick="editCell(this)">Cơ sở dữ liệu</td>
-                <td class="course" onclick="editCell(this)">Lập trình Python</td>
-                <td onclick="editCell(this)"></td>
-                <td class="course" onclick="editCell(this)">Phát triển Web</td>
-                <td onclick="editCell(this)"></td>
+                <td class="course">Cơ sở dữ liệu</td>
+                <td class="course">Lập trình Python</td>
+                <td></td>
+                <td class="course">Phát triển Web</td>
+                <td></td>
             </tr>
             <tr>
                 <td>15:15 - 16:00</td>
-                <td class="course" onclick="editCell(this)">Kiểm thử phần mềm</td>
-                <td onclick="editCell(this)"></td>
-                <td class="course" onclick="editCell(this)">Thiết kế UI/UX</td>
-                <td class="course" onclick="editCell(this)">Lập trình JavaScript</td>
-                <td onclick="editCell(this)"></td>
+                <td class="course">Kiểm thử phần mềm</td>
+                <td></td>
+                <td class="course">Thiết kế UI/UX</td>
+                <td class="course">Lập trình JavaScript</td>
+                <td></td>
             </tr>
         </table>
     </div>
-
     <script>
-        function addOrUpdateCourse() {
-            const timeSlot = document.getElementById('timeSlot').value;
-            const day = document.getElementById('day').value;
-            const course = document.getElementById('course').value.trim();
-
-            if (!course) {
-                alert('Vui lòng nhập môn học!');
-                return;
+        const days = ["Thứ Hai", "Thứ Ba", "Thứ Tư", "Thứ Năm", "Thứ Sáu"];
+        const timeSlots = ["08:30 - 10:00", "10:30 - 12:00", "13:15 - 14:45", "15:15 - 16:00"];
+        
+        function updateSchedule() {
+            const timeSlot = document.getElementById("timeSlot").value;
+            const day = document.getElementById("day").value;
+            const course = document.getElementById("course").value.trim();
+            
+            const table = document.getElementById("scheduleTable");
+            const rowIndex = timeSlots.indexOf(timeSlot) + 1;
+            const colIndex = days.indexOf(day) + 1;
+            
+            if (rowIndex > 0 && colIndex > 0) {
+                const cell = table.rows[rowIndex].cells[colIndex];
+                cell.textContent = course;
+                cell.className = course ? "course" : "";
             }
-
-            const table = document.getElementById('scheduleTable');
-            const rows = table.getElementsByTagName('tr');
-            let targetCell = null;
-
-            // Tìm ô tương ứng với thời gian và ngày
-            for (let i = 1; i < rows.length; i++) {
-                const cells = rows[i].getElementsByTagName('td');
-                if (cells[0].textContent === timeSlot) {
-                    const days = ['Thứ Hai', 'Thứ Ba', 'Thứ Tư', 'Thứ Năm', 'Thứ Sáu'];
-                    const dayIndex = days.indexOf(day) + 1;
-                    targetCell = cells[dayIndex];
-                    break;
-                }
-            }
-
-            if (targetCell) {
-                targetCell.textContent = course;
-                targetCell.classList.add('course');
-            }
-
-            // Reset input
-            document.getElementById('course').value = '';
+            
+            document.getElementById("course").value = "";
         }
-
-        function editCell(cell) {
-            const currentCourse = cell.textContent;
-            const timeSlot = cell.parentElement.getElementsByTagName('td')[0].textContent;
-            const dayIndex = Array.from(cell.parentElement.getElementsByTagName('td')).indexOf(cell) - 1;
-            const days = ['Thứ Hai', 'Thứ Ba', 'Thứ Tư', 'Thứ Năm', 'Thứ Sáu'];
-            const day = days[dayIndex];
-
-            // Cập nhật form với thông tin hiện tại
-            document.getElementById('timeSlot').value = timeSlot;
-            document.getElementById('day').value = day;
-            document.getElementById('course').value = currentCourse;
-
-            // Focus vào input để người dùng chỉnh sửa
-            document.getElementById('course').focus();
+        
+        function fillForm(event) {
+            const cell = event.target;
+            if (cell.tagName === "TD" && cell.cellIndex > 0) {
+                const rowIndex = cell.parentNode.rowIndex - 1;
+                const colIndex = cell.cellIndex - 1;
+                
+                document.getElementById("timeSlot").value = timeSlots[rowIndex];
+                document.getElementById("day").value = days[colIndex];
+                document.getElementById("course").value = cell.textContent;
+            }
         }
+        
+        document.getElementById("scheduleTable").addEventListener("click", fillForm);
     </script>
 </body>
 </html>
