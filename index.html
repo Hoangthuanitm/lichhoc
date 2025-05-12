@@ -14,8 +14,14 @@
         h1 {
             text-align: center;
             color: #333;
+            cursor: pointer;
+            padding: 10px;
+            border: 1px solid transparent;
         }
-        .schedule, .form-container {
+        h1:hover {
+            border: 1px dashed #ddd;
+        }
+        .schedule {
             max-width: 1200px;
             margin: 0 auto;
             background-color: #fff;
@@ -52,66 +58,51 @@
             font-weight: bold;
             color: #2c3e50;
         }
-        .form-container {
-            margin-bottom: 20px;
-            display: flex;
-            gap: 10px;
-            flex-wrap: wrap;
-        }
-        .form-container select, .form-container textarea {
-            padding: 8px;
+        .edit-input, .edit-textarea {
+            width: 100%;
+            box-sizing: border-box;
+            padding: 5px;
             font-size: 14px;
             border: 1px solid #ddd;
             border-radius: 4px;
         }
-        .form-container textarea {
-            width: 300px;
-            height: 100px;
+        .edit-textarea {
+            height: 80px;
             resize: vertical;
         }
-        .form-container button {
-            padding: 8px 16px;
+        .save-button {
+            margin-top: 5px;
+            padding: 5px 10px;
             background-color: #4CAF50;
             color: white;
             border: none;
             border-radius: 4px;
             cursor: pointer;
         }
-        .form-container button:hover {
+        .save-button:hover {
             background-color: #45a049;
+        }
+        .title-container {
+            position: relative;
+            display: inline-block;
         }
         @media (max-width: 768px) {
             table, th, td {
                 font-size: 12px;
                 padding: 8px;
             }
-            .form-container {
-                flex-direction: column;
+            .edit-textarea {
+                height: 60px;
             }
-            .form-container textarea {
-                width: 100%;
+            h1 {
+                font-size: 1.5em;
             }
         }
     </style>
 </head>
 <body>
-    <h1>Lịch Học Chuyên Nghiệp - Tuần 1</h1>
-    <div class="form-container">
-        <select id="timeSlot">
-            <option value="08:30 - 10:00">08:30 - 10:00</option>
-            <option value="10:30 - 12:00">10:30 - 12:00</option>
-            <option value="13:15 - 14:45">13:15 - 14:45</option>
-            <option value="15:15 - 16:00">15:15 - 16:00</option>
-        </select>
-        <select id="day">
-            <option value="Thứ Hai">Thứ Hai</option>
-            <option value="Thứ Ba">Thứ Ba</option>
-            <option value="Thứ Tư">Thứ Tư</option>
-            <option value="Thứ Năm">Thứ Năm</option>
-            <option value="Thứ Sáu">Thứ Sáu</option>
-        </select>
-        <textarea id="course" placeholder="Nhập nội dung (môn học, giáo viên, phòng học, ghi chú...)"></textarea>
-        <button onclick="updateSchedule()">Thêm/Chỉnh sửa</button>
+    <div class="title-container">
+        <h1 id="scheduleTitle">Lịch Học Chuyên Nghiệp - Tuần 1</h1>
     </div>
     <div class="schedule">
         <table id="scheduleTable">
@@ -158,40 +149,78 @@
         </table>
     </div>
     <script>
-        const days = ["Thứ Hai", "Thứ Ba", "Thứ Tư", "Thứ Năm", "Thứ Sáu"];
-        const timeSlots = ["08:30 - 10:00", "10:30 - 12:00", "13:15 - 14:45", "15:15 - 16:00"];
-        
-        function updateSchedule() {
-            const timeSlot = document.getElementById("timeSlot").value;
-            const day = document.getElementById("day").value;
-            const course = document.getElementById("course").value.trim();
-            
-            const table = document.getElementById("scheduleTable");
-            const rowIndex = timeSlots.indexOf(timeSlot) + 1;
-            const colIndex = days.indexOf(day) + 1;
-            
-            if (rowIndex > 0 && colIndex > 0) {
-                const cell = table.rows[rowIndex].cells[colIndex];
-                cell.innerHTML = course.replace(/\n/g, "<br>");
-                cell.className = course ? "course" : "";
-            }
-            
-            document.getElementById("course").value = "";
-        }
-        
-        function fillForm(event) {
+        // Edit table cell
+        function editCell(event) {
             const cell = event.target;
-            if (cell.tagName === "TD" && cell.cellIndex > 0) {
-                const rowIndex = cell.parentNode.rowIndex - 1;
-                const colIndex = cell.cellIndex - 1;
-                
-                document.getElementById("timeSlot").value = timeSlots[rowIndex];
-                document.getElementById("day").value = days[colIndex];
-                document.getElementById("course").value = cell.innerHTML.replace(/<br\s*\/?>/gi, "\n");
-            }
+            if (cell.tagName !== "TD") return;
+
+            // Prevent multiple edits
+            if (cell.querySelector("input") || cell.querySelector("textarea")) return;
+
+            const isTimeCell = cell.cellIndex === 0;
+            const originalContent = cell.innerHTML.replace(/<br\s*\/?>/gi, "\n");
+            cell.innerHTML = "";
+
+            // Create input or textarea based on cell type
+            const inputElement = isTimeCell
+                ? document.createElement("input")
+                : document.createElement("textarea");
+            inputElement.className = isTimeCell ? "edit-input" : "edit-textarea";
+            inputElement.value = originalContent;
+            cell.appendChild(inputElement);
+
+            // Create save button
+            const saveButton = document.createElement("button");
+            saveButton.className = "save-button";
+            saveButton.textContent = "Lưu";
+            saveButton.onclick = () => saveCell(cell, inputElement, isTimeCell);
+            cell.appendChild(saveButton);
+
+            inputElement.focus();
         }
-        
-        document.getElementById("scheduleTable").addEventListener("click", fillForm);
+
+        function saveCell(cell, inputElement, isTimeCell) {
+            const newContent = inputElement.value.trim();
+            cell.innerHTML = newContent.replace(/\n/g, "<br>");
+            cell.className = newContent && !isTimeCell ? "course" : "";
+        }
+
+        // Edit title
+        function editTitle(event) {
+            const title = event.target;
+            if (title.tagName !== "H1") return;
+
+            // Prevent multiple edits
+            if (title.querySelector("input")) return;
+
+            const originalContent = title.textContent;
+            title.innerHTML = "";
+
+            // Create input for title
+            const inputElement = document.createElement("input");
+            inputElement.className = "edit-input";
+            inputElement.value = originalContent;
+            inputElement.style.width = "80%";
+            title.appendChild(inputElement);
+
+            // Create save button
+            const saveButton = document.createElement("button");
+            saveButton.className = "save-button";
+            saveButton.textContent = "Lưu";
+            saveButton.onclick = () => saveTitle(title, inputElement);
+            title.appendChild(saveButton);
+
+            inputElement.focus();
+        }
+
+        function saveTitle(title, inputElement) {
+            const newContent = inputElement.value.trim();
+            title.textContent = newContent || "Lịch Học Chuyên Nghiệp - Tuần 1"; // Fallback if empty
+        }
+
+        // Add event listeners
+        document.getElementById("scheduleTable").addEventListener("click", editCell);
+        document.getElementById("scheduleTitle").addEventListener("click", editTitle);
     </script>
 </body>
 </html>
