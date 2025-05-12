@@ -31,8 +31,9 @@
         th, td {
             border: 1px solid #ddd;
             padding: 10px;
-            text-align: center;
+            text-align: left;
             font-size: 14px;
+            vertical-align: top;
         }
         th {
             background-color: #4CAF50;
@@ -41,6 +42,8 @@
         td {
             background-color: #fafafa;
             cursor: pointer;
+            max-height: 100px;
+            overflow-y: auto;
         }
         td:empty {
             background-color: #f0f0f0;
@@ -55,11 +58,16 @@
             gap: 10px;
             flex-wrap: wrap;
         }
-        .form-container select, .form-container input {
+        .form-container select, .form-container textarea {
             padding: 8px;
             font-size: 14px;
             border: 1px solid #ddd;
             border-radius: 4px;
+        }
+        .form-container textarea {
+            width: 300px;
+            height: 100px;
+            resize: vertical;
         }
         .form-container button {
             padding: 8px 16px;
@@ -80,6 +88,9 @@
             .form-container {
                 flex-direction: column;
             }
+            .form-container textarea {
+                width: 100%;
+            }
         }
     </style>
 </head>
@@ -99,7 +110,7 @@
             <option value="Thứ Năm">Thứ Năm</option>
             <option value="Thứ Sáu">Thứ Sáu</option>
         </select>
-        <input type="text" id="course" placeholder="Nhập môn học">
+        <textarea id="course" placeholder="Nhập nội dung (môn học, giáo viên, phòng học, ghi chú...)"></textarea>
         <button onclick="updateSchedule()">Thêm/Chỉnh sửa</button>
     </div>
     <div class="schedule">
@@ -114,34 +125,34 @@
             </tr>
             <tr>
                 <td>08:30 - 10:00</td>
-                <td class="course">Lập trình Python</td>
+                <td class="course">Lập trình Python<br>Giáo viên: Nguyễn Văn A<br>Phòng: A101<br>Ghi chú: Mang laptop</td>
                 <td></td>
-                <td class="course">Phát triển Web</td>
-                <td class="course">Cơ sở dữ liệu</td>
-                <td class="course">Kiểm thử phần mềm</td>
+                <td class="course">Phát triển Web<br>Giáo viên: Trần Thị B<br>Phòng: B204<br>Ghi chú: Chuẩn bị dự án</td>
+                <td class="course">Cơ sở dữ liệu<br>Giáo viên: Lê Văn C<br>Phòng: A102<br>Ghi chú: Ôn bài SQL</td>
+                <td class="course">Kiểm thử phần mềm<br>Giáo viên: Phạm Thị D<br>Phòng: C301<br>Ghi chú: Bài tập nhóm</td>
             </tr>
             <tr>
                 <td>10:30 - 12:00</td>
                 <td></td>
-                <td class="course">Thiết kế UI/UX</td>
-                <td class="course">Lập trình JavaScript</td>
+                <td class="course">Thiết kế UI/UX<br>Giáo viên: Hoàng Văn E<br>Phòng: B205<br>Ghi chú: Cài Figma</td>
+                <td class="course">Lập trình JavaScript<br>Giáo viên: Nguyễn Văn F<br>Phòng: A103<br>Ghi chú: Học ES6</td>
                 <td></td>
-                <td class="course">Quản lý dự án</td>
+                <td class="course">Quản lý dự án<br>Giáo viên: Trần Văn G<br>Phòng: C302<br>Ghi chú: Thảo luận Agile</td>
             </tr>
             <tr>
                 <td>13:15 - 14:45</td>
-                <td class="course">Cơ sở dữ liệu</td>
-                <td class="course">Lập trình Python</td>
+                <td class="course">Cơ sở dữ liệu<br>Giáo viên: Lê Văn C<br>Phòng: A102<br>Ghi chú: Thực hành NoSQL</td>
+                <td class="course">Lập trình Python<br>Giáo viên: Nguyễn Văn A<br>Phòng: A101<br>Ghi chú: Bài tập OOP</td>
                 <td></td>
-                <td class="course">Phát triển Web</td>
+                <td class="course">Phát triển Web<br>Giáo viên: Trần Thị B<br>Phòng: B204<br>Ghi chú: HTML/CSS nâng cao</td>
                 <td></td>
             </tr>
             <tr>
                 <td>15:15 - 16:00</td>
-                <td class="course">Kiểm thử phần mềm</td>
+                <td class="course">Kiểm thử phần mềm<br>Giáo viên: Phạm Thị D<br>Phòng: C301<br>Ghi chú: Kiểm thử tự động</td>
                 <td></td>
-                <td class="course">Thiết kế UI/UX</td>
-                <td class="course">Lập trình JavaScript</td>
+                <td class="course">Thiết kế UI/UX<br>Giáo viên: Hoàng Văn E<br>Phòng: B205<br>Ghi chú: Dự án cuối kỳ</td>
+                <td class="course">Lập trình JavaScript<br>Giáo viên: Nguyễn Văn F<br>Phòng: A103<br>Ghi chú: Học React</td>
                 <td></td>
             </tr>
         </table>
@@ -161,7 +172,7 @@
             
             if (rowIndex > 0 && colIndex > 0) {
                 const cell = table.rows[rowIndex].cells[colIndex];
-                cell.textContent = course;
+                cell.innerHTML = course.replace(/\n/g, "<br>");
                 cell.className = course ? "course" : "";
             }
             
@@ -176,7 +187,7 @@
                 
                 document.getElementById("timeSlot").value = timeSlots[rowIndex];
                 document.getElementById("day").value = days[colIndex];
-                document.getElementById("course").value = cell.textContent;
+                document.getElementById("course").value = cell.innerHTML.replace(/<br\s*\/?>/gi, "\n");
             }
         }
         
