@@ -148,7 +148,58 @@
             </tr>
         </table>
     </div>
-    <script>
+
+    <!-- Firebase SDK -->
+    <script type="module">
+        // Import Firebase modular SDK
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-app.js";
+        import { getFirestore, collection, doc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js";
+
+        // Firebase configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyAfy4QMD9_7PyFHpInNdKDRWuW4AYCtLJ4",
+            authDomain: "history-e4633.firebaseapp.com",
+            projectId: "history-e4633",
+            storageBucket: "history-e4633.firebasestorage.app",
+            messagingSenderId: "331974436893",
+            appId: "1:331974436893:web:10c3c6adf7b66d2b5fbef4",
+            measurementId: "G-DC055090BW"
+        };
+
+        // Initialize Firebase
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+
+        // Load schedule from Firestore
+        async function loadSchedule() {
+            try {
+                // Load title
+                const titleRef = doc(db, "lichhoc", "title");
+                const titleDoc = await getDoc(titleRef);
+                if (titleDoc.exists()) {
+                    document.getElementById("scheduleTitle").textContent = titleDoc.data().value || "Lịch Học Chuyên Nghiệp - Tuần 1";
+                }
+
+                // Load table cells
+                const table = document.getElementById("scheduleTable");
+                for (let i = 1; i < table.rows.length; i++) {
+                    const rowRef = doc(db, "lichhoc", "schedule", "rows", i.toString());
+                    const rowDoc = await getDoc(rowRef);
+                    if (rowDoc.exists()) {
+                        const cells = rowDoc.data();
+                        for (let j = 0; j < table.rows[i].cells.length; j++) {
+                            const content = cells[j] || "";
+                            table.rows[i].cells[j].innerHTML = content.replace(/\n/g, "<br>");
+                            table.rows[i].cells[j].className = content && j !== 0 ? "course" : "";
+                        }
+                    }
+                }
+            } catch (error) {
+                console.error("Error loading schedule:", error);
+                alert("Không thể tải lịch học từ Firestore.");
+            }
+        }
+
         // Edit table cell
         function editCell(event) {
             const cell = event.target;
@@ -179,10 +230,22 @@
             inputElement.focus();
         }
 
-        function saveCell(cell, inputElement, isTimeCell) {
+        async function saveCell(cell, inputElement, isTimeCell) {
             const newContent = inputElement.value.trim();
-            cell.innerHTML = newContent.replace(/\n/g, "<br>");
-            cell.className = newContent && !isTimeCell ? "course" : "";
+            try {
+                // Save to Firestore
+                const rowIndex = cell.parentNode.rowIndex;
+                const cellIndex = cell.cellIndex;
+                const rowRef = doc(db, "lichhoc", "schedule", "rows", rowIndex.toString());
+                await setDoc(rowRef, { [cellIndex]: newContent }, { merge: true });
+
+                // Update UI
+                cell.innerHTML = newContent.replace(/\n/g, "<br>");
+                cell.className = newContent && !isTimeCell ? "course" : "";
+            } catch (error) {
+                console.error("Error saving cell:", error);
+                alert("Không thể lưu thay đổi vào Firestore.");
+            }
         }
 
         // Edit title
@@ -213,14 +276,27 @@
             inputElement.focus();
         }
 
-        function saveTitle(title, inputElement) {
-            const newContent = inputElement.value.trim();
-            title.textContent = newContent || "Lịch Học Chuyên Nghiệp - Tuần 1"; // Fallback if empty
+        async function saveTitle(title, inputElement) {
+            const newContent = inputElement.value.trim() || "Lịch Học Chuyên Nghiệp - Tuần 1";
+            try {
+                // Save to Firestore
+                const titleRef = doc(db, "lichhoc", "title");
+                await setDoc(titleRef, { value: newContent });
+
+                // Update UI
+                title.textContent = newContent;
+            } catch (error) {
+                console.error("Error saving title:", error);
+                alert("Không thể lưu tiêu đề vào Firestore.");
+            }
         }
 
         // Add event listeners
         document.getElementById("scheduleTable").addEventListener("click", editCell);
         document.getElementById("scheduleTitle").addEventListener("click", editTitle);
+
+        // Load schedule on page load
+        document.addEventListener("DOMContentLoaded", loadSchedule);
     </script>
 </body>
 </html>
